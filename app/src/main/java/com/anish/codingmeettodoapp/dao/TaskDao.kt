@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.anish.codingmeettodoapp.models.Task
 import kotlinx.coroutines.flow.Flow
 
@@ -26,4 +27,12 @@ interface TaskDao {
     @Query("DELETE FROM Task WHERE taskId == :taskId")
     suspend fun deleteTaskUsingId(taskId: String): Int
 
+    // Update whole item
+
+    @Update
+    suspend fun updateTask(task:Task):Int
+
+    // update particular field in multiple fields
+    @Query ("UPDATE Task SET taskTitle=:title,description = :description WHERE taskId = :taskId")
+suspend fun updatTaskParticularField(taskId: String,title:String,description:String):Int
 }

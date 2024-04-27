@@ -11,7 +11,7 @@ import com.anish.codingmeettodoapp.models.Task
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class TaskRecyclerViewAdapter(private val deleteCallback: (position: Int, task: Task) -> Unit) :
+class TaskRecyclerViewAdapter(private val delete_updateCallback: (type:String,position: Int, task: Task) -> Unit) :
     RecyclerView.Adapter<TaskRecyclerViewAdapter.ViewHolder>() {
 
     private val taskList = arrayListOf<Task>()
@@ -23,7 +23,7 @@ class TaskRecyclerViewAdapter(private val deleteCallback: (position: Int, task: 
         val dateTxt: TextView = itemView.findViewById(R.id.dateTxt)
         val editdelete: ImageView = itemView.findViewById(R.id.editdelete)
         val editImg: ImageView = itemView.findViewById(R.id.editImg)
-    }
+     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
@@ -41,7 +41,13 @@ class TaskRecyclerViewAdapter(private val deleteCallback: (position: Int, task: 
         holder.editdelete.setOnClickListener {
             if (holder.adapterPosition != -1) {
 
-                deleteCallback(holder.adapterPosition, tasklist)
+                delete_updateCallback("delete",holder.adapterPosition, tasklist)
+            }
+        }
+        holder.editImg.setOnClickListener {
+            if (holder.adapterPosition != -1) {
+
+                delete_updateCallback("update",holder.adapterPosition, tasklist)
             }
         }
     }
