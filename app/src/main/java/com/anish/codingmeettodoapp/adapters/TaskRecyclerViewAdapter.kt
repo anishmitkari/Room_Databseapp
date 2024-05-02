@@ -1,10 +1,13 @@
 package com.coding.meet.todo_app.adapters
 
+import android.media.browse.MediaBrowser.ItemCallback
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.anish.codingmeettodoapp.R
 import com.anish.codingmeettodoapp.models.Task
@@ -12,9 +15,8 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 class TaskRecyclerViewAdapter(private val delete_updateCallback: (type:String,position: Int, task: Task) -> Unit) :
-    RecyclerView.Adapter<TaskRecyclerViewAdapter.ViewHolder>() {
+    ListAdapter<Task, TaskRecyclerViewAdapter.ViewHolder>(DiffCallback()) {
 
-    private val taskList = arrayListOf<Task>()
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
@@ -32,7 +34,7 @@ class TaskRecyclerViewAdapter(private val delete_updateCallback: (type:String,po
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val tasklist = taskList[position]
+        val tasklist = getItem(position)
         holder.titletext.text = tasklist.title
         holder.descrTxt.text = tasklist.description
 
@@ -52,13 +54,20 @@ class TaskRecyclerViewAdapter(private val delete_updateCallback: (type:String,po
         }
     }
 
-    override fun getItemCount(): Int {
-        return taskList.size
-    }
 
-    fun addAlltask(newTaskList: List<Task>) {
-        taskList.clear()
-        taskList.addAll(newTaskList)
-        notifyDataSetChanged()
+
+
+    // Diff callback
+
+    class DiffCallback :DiffUtil.ItemCallback<Task>(){
+        override fun areItemsTheSame(oldItem: Task, newItem: Task): Boolean {
+return oldItem.id==newItem.id
+
+        }
+
+        override fun areContentsTheSame(oldItem: Task, newItem: Task): Boolean {
+return oldItem == newItem
+        }
+
     }
 }

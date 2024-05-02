@@ -230,7 +230,12 @@ class MainActivity : AppCompatActivity() {
         })
 
         mainBinding.taskRV.adapter = taskRVVBListAdapter
-
+        taskRVVBListAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                super.onItemRangeInserted(positionStart, itemCount)
+                mainBinding.taskRV.smoothScrollToPosition(positionStart)
+            }
+        })
         callGettaskList(taskRVVBListAdapter)
     }
 
@@ -247,7 +252,7 @@ class MainActivity : AppCompatActivity() {
                         it.data?.collect { taskList ->
                             loadingDialog.dismiss()
 
-                            taskRecyclerViewAdapter.addAlltask(taskList)
+                            taskRecyclerViewAdapter.submitList(taskList)
                         }
                     }
 
