@@ -9,13 +9,13 @@ import com.anish.codingmeettodoapp.dao.TaskDao
 import com.anish.codingmeettodoapp.Typeconverters.TypeConverter
 import com.anish.codingmeettodoapp.models.Task
 
-@Database(entities = [Task::class], version = 1)
-
+@Database(
+    entities = [Task::class],
+    version = 1,
+    exportSchema = false
+)
 @TypeConverters(TypeConverter::class)
 abstract class TaskDatabase : RoomDatabase() {
-
-
-
 
     abstract val taskDao : TaskDao
 
@@ -25,7 +25,9 @@ abstract class TaskDatabase : RoomDatabase() {
         fun getInstance(context: Context): TaskDatabase {
             synchronized(this) {
                 return INSTANCE ?: Room.databaseBuilder(
-                    context.applicationContext, TaskDatabase::class.java, "task_db"
+                    context.applicationContext,
+                    TaskDatabase::class.java,
+                    "task_db"
                 ).build().also {
                     INSTANCE = it
                 }
@@ -33,4 +35,5 @@ abstract class TaskDatabase : RoomDatabase() {
 
         }
     }
+
 }
