@@ -1,6 +1,7 @@
 package com.anish.codingmeettodoapp.repository
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.anish.codingmeettodoapp.Utils.Resource
 import com.anish.codingmeettodoapp.Utils.Resource.Error
@@ -53,15 +54,6 @@ class TaskRepository(application: Application) {
         }
     }
 
-    fun getTaskList() = flow {
-        emit(Loading())
-        try {
-            val result = taskDao.getTaskList()
-            emit(Success(result))
-        } catch (e: Exception) {
-            emit(Error(e.message.toString()))
-        }
-    }
 
 
     fun updateTask(task: Task) = MutableLiveData<Resource<Int>>().apply {
@@ -87,4 +79,28 @@ class TaskRepository(application: Application) {
             postValue(Error(e.message.toString()))
         }
     }
+
+
+    fun getTaskList() = flow {
+        emit(Loading())
+        try {
+            val result = taskDao.getTaskList()
+            emit(Success(result))
+        } catch (e: Exception) {
+            emit(Error(e.message.toString()))
+        }
+    }
+
+    fun searchTaskList(query: String) = flow {
+
+            try {
+                 emit(Loading())
+                val result = taskDao.searchTaskList("%${query}%")
+                 emit(Success(   result))
+            } catch (e: Exception) {
+                emit(Error(e.message.toString()))
+
+        }
+    }
+
 }

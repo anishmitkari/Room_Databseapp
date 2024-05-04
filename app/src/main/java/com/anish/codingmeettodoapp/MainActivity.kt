@@ -5,14 +5,15 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.ImageView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import com.anish.codingmeettodoapp.Utils.Status
 import com.anish.codingmeettodoapp.Utils.clearEditText
+import com.anish.codingmeettodoapp.Utils.hideKeyBoard
 import com.anish.codingmeettodoapp.Utils.longToastShow
 import com.anish.codingmeettodoapp.Utils.setupDialog
 import com.anish.codingmeettodoapp.Utils.validateEditText
@@ -20,6 +21,7 @@ import com.anish.codingmeettodoapp.ViewModels.MainActivity_viewmodel
 import com.anish.codingmeettodoapp.databinding.ActivityMainBinding
 import com.anish.codingmeettodoapp.models.Task
 import com.coding.meet.todo_app.adapters.TaskRecyclerViewAdapter
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.CoroutineScope
@@ -87,7 +89,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        mainBinding.addbtn.setOnClickListener {
+        mainBinding.addTaskFABtn.setOnClickListener {
             clearEditText(addETTitle, addETTitleL)
             clearEditText(addETDesc, addETDescL)
             addTaskDialog.show()
@@ -95,8 +97,7 @@ class MainActivity : AppCompatActivity() {
         val saveTaskBtn = addTaskDialog.findViewById<Button>(R.id.saveTaskBtn)
         saveTaskBtn.setOnClickListener {
             if (validateEditText(addETTitle, addETTitleL) && validateEditText(
-                    addETDesc,
-                    addETDescL
+                    addETDesc, addETDescL
                 )
             ) {
                 addTaskDialog.dismiss()
@@ -152,8 +153,7 @@ class MainActivity : AppCompatActivity() {
             if (type == "delete") {
                 taskViewModel
 //                .deleteTask(task)
-                    .deleteTaskUsingId(task.id)
-                    .observe(this) {
+                    .deleteTaskUsingId(task.id).observe(this) {
                         when (it.status) {
                             Status.LOADING -> {
                                 loadingDialog.show()
@@ -172,12 +172,14 @@ class MainActivity : AppCompatActivity() {
                             }
                         }
                     }
+                restoreDeleteTask(task)
             } else if (type == "update") {
                 updateETTitle.setText(task.title)
                 updateETDesc.setText(task.description)
                 updateTaskBtn.setOnClickListener {
-                    if (validateEditText(updateETTitle, updateETTitleL)
-                        && validateEditText(updateETDesc, updateETDescL)
+                    if (validateEditText(updateETTitle, updateETTitleL) && validateEditText(
+                            updateETDesc, updateETDescL
+                        )
                     ) {
                         val updateTask = Task(
                             task.id,
@@ -194,8 +196,7 @@ class MainActivity : AppCompatActivity() {
                                 task.id,
                                 updateETTitle.text.toString().trim(),
                                 updateETDesc.text.toString().trim()
-                            )
-                            .observe(this) {
+                            ).observe(this) {
                                 when (it.status) {
                                     Status.LOADING -> {
                                         loadingDialog.show()
@@ -221,8 +222,8 @@ class MainActivity : AppCompatActivity() {
         }
         mainBinding.taskRV.adapter = taskRVVBListAdapter
 
-        taskRVVBListAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver()
-        {
+        taskRVVBListAdapter.registerAdapterDataObserver(object :
+            RecyclerView.AdapterDataObserver() {
             override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
                 super.onItemRangeInserted(positionStart, itemCount)
                 mainBinding.taskRV.smoothScrollToPosition(positionStart)
@@ -230,17 +231,63 @@ class MainActivity : AppCompatActivity() {
         })
 
         mainBinding.taskRV.adapter = taskRVVBListAdapter
-        taskRVVBListAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+        taskRVVBListAdapter.registerAdapterDataObserver(object :
+            RecyclerView.AdapterDataObserver() {
             override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
                 super.onItemRangeInserted(positionStart, itemCount)
                 mainBinding.taskRV.smoothScrollToPosition(positionStart)
             }
         })
         callGettaskList(taskRVVBListAdapter)
+        callSearch()
+
+
     }
 
+    private fun restoreDeleteTask(deletedTask: Task) {
+        val snackbar =
+            Snackbar.make(mainBinding.root, "Deleted''{deletedTask.title}'", Snackbar.LENGTH_LONG)
 
-    fun callGettaskList(taskRecyclerViewAdapter:TaskRecyclerViewAdapter) {
+        snackbar.setAction("Undo") {
+            taskViewModel.insertTask(deletedTask)
+
+        }
+        snackbar.show()
+    }
+
+    fun callSearch() {
+        mainBinding.edSearch.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+
+            }
+
+            override fun afterTextChanged(query: Editable) {
+                if (query.toString().isNotEmpty()) {
+                    Log.e(TAG, "afterTextChanged: ")
+                    taskViewModel.searchTaskList(query.toString())
+                } else {
+
+                    taskViewModel.getTaskList()
+                }
+            }
+
+        })
+
+        mainBinding.edSearch.setOnEditorActionListener { v, actionId, event ->
+
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                hideKeyBoard(v)
+                return@setOnEditorActionListener true
+            }
+            false
+        }
+    }
+
+    fun callGettaskList(taskRecyclerViewAdapter: TaskRecyclerViewAdapter) {
         CoroutineScope(Dispatchers.Main).launch {
             taskViewModel.getTaskList().collect {
                 when (it.status) {

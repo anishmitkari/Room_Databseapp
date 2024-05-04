@@ -35,4 +35,9 @@ interface TaskDao {
     // update particular field in multiple fields
     @Query ("UPDATE Task SET taskTitle=:title,description = :description WHERE taskId = :taskId")
     suspend fun updatTaskParticularField(taskId: String,title:String,description:String):Int
+
+
+
+    @Query("SELECT * FROM Task WHERE taskTitle LIKE :query ORDER BY date DESC")
+    fun searchTaskList(query: String) : Flow<List<Task>>
 }

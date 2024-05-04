@@ -30,4 +30,11 @@ class MainActivity_viewmodel (application: Application) : AndroidViewModel(appli
     fun updateTaskParticularField(taskId: String,title: String,description: String): MutableLiveData<Resource<Int>> {
         return taskRepository.updateTaskParticularField(taskId,title,description)
     }
+
+            fun searchTaskList(query:String){
+                taskRepository.searchTaskList(query)
+            }
+
+
+
 }
